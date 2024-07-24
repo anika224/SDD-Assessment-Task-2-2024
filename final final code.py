@@ -46,6 +46,8 @@ class MultiplicationApp:
                     child.config(bg=self.bg_color, fg=self.fg_color)
                     if isinstance(child, ttk.Button):
                         child.config(style="Custom.TButton")
+                    if isinstance(child, tk.Text):
+                        child.config(bg=self.bg_color, fg=self.fg_color, font=self.default_font)
             except tk.TclError:
                 pass
 
@@ -165,10 +167,9 @@ class MultiplicationApp:
         lesson_content = {
             "1-2": "Multiplication is defined as repeated addition. It is that simple! You add groups of the same number together. For example, when we multiply 2 by 3, 3 is added to itself twice, resulting in 3 + 3 = 6.\n\nRules: Producting an integer with 0 always yields 0. For example, 3 x 0 = 0.\nThe product of a number with one is always the other number. For example, 3 x 1 equals 3.\n\nHint: When multiplying by 10, add a 0 to the end of the other number. For example, 3 x 10 equals 30.",
             "3-4": "Two-digit multiplication is just the multiplication of a single digit twice. It begins the same way, with multiplying the numbers in the one place, followed by a second round of multiplication using the numbers in the ten position.\n\nLet's say we have two numbers: 12 and 34. We can divide these numbers into tens and ones. So 12 becomes 10 and 2, whereas 34 becomes 30 and 4.\n\nNext, we multiply each part of the first number by each part of the second number. So we multiply 10 by 30 to get 300; 10 by 4 to get 40; 2 by 30 to get 60; and 2 by 4 to get 8.\n\nThe findings are then combined together. So, 300 + 40 + 60 + 8 = 408. So that's our response!\n\nThis procedure is called grouping because we separate the tens and ones before multiplying and adding them. It's an excellent approach to learn how multiplication works with huge numbers. Remember: practice makes perfect! Happy learning!",
-            "5-6": "When we multiply three-digit integers, we arrange them in columns based on the digits' place values. The place values are one, ten, and hundreds.\n\nNow let's speak about decimals. Decimals are fractions of a whole number. They employ a decimal point to distinguish the complete number from the fractional component. For example, in the number 1.23, '1' represents the full number, whereas '23' represents the fractional component.\n\nWhen multiplying decimals, we start as if they were whole numbers. Then we count the total number of digits following the decimal point in the original numbers. The response should have the same amount of digits following the decimal point.\n\nTo multiply 0.03 (2 decimal places) by 1.1 (1 decimal place), we first multiply them as whole integers (3 x 11 = 33). Then, we put the decimal point in the answer so it has three decimal places, giving us 0.033.\n\nRemember, practice is key when learning new mathematical concepts. Happy learning!"
+            "5-6": "When we multiply three-digit integers, we arrange them in columns based on the digits' place values. The place values are one, ten, and hundreds.\n\nNow let's speak about decimals. Decimals are fractions of a whole number. They employ a decimal point to distinguish the complete number from the fractional component. For example, in the number 1.23, '1' represents the full number, whereas '23' represents the fractional component.\n\nWhen multiplying decimals, we start as if they were whole numbers. Then we count the total number of digits following the decimal point in the original numbers. The response should have the same amount of digits following the decimal point.\n\nTo multiply 0.03 (2 decimal places) by 1.1 (1 decimal place), we first multiply them as whole integers (3 x 11 = 33). Then, we put the decimal point in the answer so it has three decimal places, giving us 0.033."
         }
 
-        # Add lesson labels
         lesson_label = ttk.Label(self.lesson_frame, text=f"Lesson for Level {level}")
         lesson_label.pack(pady=10)
         self.all_widgets.append(lesson_label)
@@ -224,6 +225,8 @@ class MultiplicationApp:
     def start_quiz(self, level):
         # Set the current level for the quiz
         self.current_level = level
+        self.question_count = 0
+        self.correct_answers = 0
 
         # Clear current widgets
         self.clear_widgets()
@@ -285,6 +288,7 @@ class MultiplicationApp:
         try:
             user_answer = int(self.answer_entry.get())
             if user_answer == self.correct_answer:
+                self.correct_answers += 1
                 messagebox.showinfo("Correct", "Well done! That's the correct answer.")
             else:
                 messagebox.showerror("Incorrect", f"Sorry, the correct answer is {self.correct_answer}.")
@@ -293,7 +297,42 @@ class MultiplicationApp:
 
         # Clear the answer entry
         self.answer_entry.delete(0, tk.END)
-        self.generate_question(self.current_level)
+
+        self.question_count += 1
+        if self.question_count < 10:
+            self.generate_question(self.current_level)
+        else:
+            self.show_results()
+
+    def show_results(self):
+        # Clear current widgets
+        self.clear_widgets()
+
+        # Create results frame
+        self.results_frame = tk.Frame(self.root, bg=self.bg_color)
+        self.results_frame.pack(fill=tk.BOTH, expand=True, pady=20)
+        self.all_widgets.append(self.results_frame)
+
+        # Show results
+        results_label = ttk.Label(self.results_frame, text=f"Well done! You scored {self.correct_answers} out of 10.")
+        results_label.pack(pady=10)
+        self.all_widgets.append(results_label)
+
+        # Add button to go back to main menu
+        main_menu_button = ttk.Button(self.results_frame, text="Main Menu", command=self.create_main_menu)
+        main_menu_button.pack(pady=10)
+        self.all_widgets.append(main_menu_button)
+
+        # Add button to go back to quiz menu
+        quiz_menu_button = ttk.Button(self.results_frame, text="Quiz Menu", command=self.create_quizzes_menu)
+        quiz_menu_button.pack(pady=10)
+        self.all_widgets.append(quiz_menu_button)
+
+        # Create the menu bar
+        self.create_menu_bar()
+
+        # Apply the settings
+        self.apply_settings()
 
     def create_home_button(self, frame):
         # Add home button to the frame
